@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoLive - Real-Time Cryptocurrency Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" id="themeToggle">
+        <i class="fas fa-moon"></i>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <p>Fetching live cryptocurrency data...</p>
+    </div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-top">
+                <div class="logo">
+                    <i class="fas fa-coins"></i>
+                    <div>
+                        <h1>CryptoLive</h1>
+                        <p class="subtitle">Real-Time Cryptocurrency Prices</p>
+                    </div>
+                </div>
+                <div class="live-indicator">
+                    <span class="pulse-dot"></span>
+                    <span>Live Data</span>
+                </div>
+            </div>
+
+            <!-- Market Overview Cards -->
+            <div class="market-overview">
+                <div class="overview-card">
+                    <i class="fas fa-chart-line"></i>
+                    <div class="overview-info">
+                        <span class="overview-value" id="totalMarketCap">Loading...</span>
+                        <span class="overview-label">Total Market Cap</span>
+                    </div>
+                </div>
+                <div class="overview-card">
+                    <i class="fas fa-fire"></i>
+                    <div class="overview-info">
+                        <span class="overview-value" id="topGainer">Loading...</span>
+                        <span class="overview-label">Top Gainer (24h)</span>
+                    </div>
+                </div>
+                <div class="overview-card">
+                    <i class="fas fa-trophy"></i>
+                    <div class="overview-info">
+                        <span class="overview-value" id="topCrypto">Loading...</span>
+                        <span class="overview-label">Market Leader</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Control Bar -->
+        <div class="control-bar">
+            <div class="search-filter">
+                <div class="search-box">
+                    <i class="fas fa-search"></i>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="Search by name or symbol (e.g., Bitcoin, BTC)...">
+                </div>
+                <div class="filter-buttons">
+                    <button class="filter-btn active" data-filter="all">
+                        <i class="fas fa-list"></i> All
+                    </button>
+                    <button class="filter-btn" data-filter="top10">
+                        <i class="fas fa-star"></i> Top 10
+                    </button>
+                    <button class="filter-btn" data-filter="gainers">
+                        <i class="fas fa-arrow-up"></i> Gainers
+                    </button>
+                    <button class="filter-btn" data-filter="losers">
+                        <i class="fas fa-arrow-down"></i> Losers
+                    </button>
+                </div>
+            </div>
+            <div class="action-buttons">
+                <button class="btn btn-refresh" onclick="refreshData()">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+                <button class="btn btn-export" onclick="exportToCSV()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <button class="btn btn-portfolio" onclick="openPortfolioManager()">
+                    <i class="fas fa-wallet"></i> My Portfolio
+                </button>
+                <button class="btn btn-learn" onclick="openLearningHub()">
+                    <i class="fas fa-graduation-cap"></i> Learn
+                </button>
+                <button class="btn btn-alerts" onclick="openAlertManager()">
+                    <i class="fas fa-bell"></i> Alerts <span id="alertCount" style="display:none; background: #ef4444; color: white; border-radius: 50%; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-size: 12px; margin-left: 5px;"></span>
+                </button>
+                <button class="btn btn-simulator" onclick="openReturnsSimulator()">
+                    <i class="fas fa-chart-bar"></i> Returns
+                </button>
+            </div>
+        </div>
+
+        <!-- Crypto Table -->
+        <div class="table-container">
+            <table class="crypto-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Coin</th>
+                        <th>Symbol</th>
+                        <th class="text-right">Price (INR)</th>
+                        <th class="text-right">24h Change</th>
+                        <th class="text-right">Market Cap</th>
+                        <th class="text-right">Volume (24h)</th>
+                        <th class="text-center">Chart</th>
+                    </tr>
+                </thead>
+                <tbody id="cryptoTableBody">
+                    <!-- Populated by JavaScript -->
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state hidden" id="emptyState">
+            <i class="fas fa-search"></i>
+            <h3>No Results Found</h3>
+            <p>Try searching with a different name or symbol</p>
+        </div>
+
+        <!-- Last Updated -->
+        <div class="last-updated">
+            <i class="fas fa-clock"></i>
+            <span>Last updated: <strong id="lastUpdated">Never</strong></span>
+        </div>
+    </div>
+
+    <!-- Portfolio Manager Modal -->
+    <div class="modal hidden" id="portfolioModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-wallet"></i> Portfolio Manager</h2>
+                <button class="modal-close" onclick="closePortfolioManager()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="portfolio-section">
+                    <h3>Add to Portfolio</h3>
+                    <div class="portfolio-input-group">
+                        <select id="portfolioCoin">
+                            <option value="">Select a coin...</option>
+                        </select>
+                        <input type="number" id="portfolioAmount" placeholder="Amount (INR)" min="1">
+                        <button onclick="addToPortfolio()" class="btn-add">Add</button>
+                    </div>
+                </div>
+                <div class="portfolio-section">
+                    <h3>Your Holdings</h3>
+                    <div id="portfolioList" class="portfolio-list"></div>
+                </div>
+                <div class="portfolio-stats">
+                    <div class="stat-box">
+                        <span class="label">Total Investment</span>
+                        <span class="value" id="totalInvestment">₹0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="label">Current Value</span>
+                        <span class="value" id="currentValue">₹0</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="label">Profit/Loss</span>
+                        <span class="value" id="profitLoss">₹0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Learning Hub Modal -->
+    <div class="modal hidden" id="learningModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2><i class="fas fa-graduation-cap"></i> Learning Hub</h2>
+                <button class="modal-close" onclick="closeLearningHub()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="learning-grid" id="learningGrid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Alert Manager Modal -->
+    <div class="modal hidden" id="alertModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-bell"></i> Price Alerts</h2>
+                <button class="modal-close" onclick="closeAlertManager()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="alert-section">
+                    <h3>Create New Alert</h3>
+                    <div class="alert-input-group">
+                        <select id="alertCoin">
+                            <option value="">Select a coin...</option>
+                        </select>
+                        <select id="alertType">
+                            <option value="above">Price Above</option>
+                            <option value="below">Price Below</option>
+                        </select>
+                        <input type="number" id="alertPrice" placeholder="Price (INR)" min="1">
+                        <button onclick="createAlert()" class="btn-add">Create Alert</button>
+                    </div>
+                </div>
+                <div class="alert-section">
+                    <h3>Active Alerts</h3>
+                    <div id="alertsList" class="alerts-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Returns Simulator Modal -->
+    <div class="modal hidden" id="simulatorModal">
+        <div class="modal-content modal-large">
+            <div class="modal-header">
+                <h2><i class="fas fa-chart-bar"></i> Returns Simulator</h2>
+                <button class="modal-close" onclick="closeReturnsSimulator()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="simulator-section">
+                    <h3>Select Coins to Simulate</h3>
+                    <div class="simulator-coin-selector" id="simulatorCoinSelector"></div>
+                </div>
+                
+                <div class="simulator-section">
+                    <h3>Choose Period</h3>
+                    <div class="period-buttons">
+                        <button onclick="updateSimulation('1w')" class="period-btn" data-period="1w">1 Week</button>
+                        <button onclick="updateSimulation('1m')" class="period-btn" data-period="1m">1 Month</button>
+                        <button onclick="updateSimulation('3m')" class="period-btn active" data-period="3m">3 Months</button>
+                        <button onclick="updateSimulation('6m')" class="period-btn" data-period="6m">6 Months</button>
+                        <button onclick="updateSimulation('1y')" class="period-btn" data-period="1y">1 Year</button>
+                    </div>
+                </div>
+
+                <div class="simulator-results">
+                    <div class="result-card bearish">
+                        <div class="scenario-label">🔻 Bearish</div>
+                        <div class="scenario-title">Conservative Estimate</div>
+                        <div class="scenario-return" id="bearishReturn">-0%</div>
+                        <div class="scenario-value" id="bearishValue">₹0</div>
+                    </div>
+                    <div class="result-card neutral">
+                        <div class="scenario-label">➡️ Neutral</div>
+                        <div class="scenario-title">Expected Return</div>
+                        <div class="scenario-return" id="neutralReturn">0%</div>
+                        <div class="scenario-value" id="neutralValue">₹0</div>
+                    </div>
+                    <div class="result-card bullish">
+                        <div class="scenario-label">🔺 Bullish</div>
+                        <div class="scenario-title">Optimistic Estimate</div>
+                        <div class="scenario-return" id="bullishReturn">+0%</div>
+                        <div class="scenario-value" id="bullishValue">₹0</div>
+                    </div>
+                </div>
+
+                <div class="simulator-section">
+                    <h3>Simulation Details</h3>
+                    <div class="simulation-chart" id="simulationChart"></div>
+                    <div class="simulation-table" id="simulationTable"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Overlay -->
+    <div class="modal-overlay hidden" id="modalOverlay" onclick="closeAllModals()"></div>
+
+    <script src="script.js"></script>
+</body>
+</html>
