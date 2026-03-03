@@ -1,6 +1,9 @@
 # 🚀 CryptoLive – Real-Time Cryptocurrency Prices
 
-A lightweight web app that displays live cryptocurrency prices using real-time API updates.
+<h3>Traders are obsessed with price charts. Learners are obsessed with not losing money. <br> What if you could see BOTH? Your projected returns + real-time price alerts + a full learning hub = confidence.<br>
+<br>This is a simulator that shows you exactly what your crypto could be worth—in 1 week, 1 month, 6 months, 1 year.<br><br>
+No more guessing. 
+Just numbers.</h3>
 
 ## 🔥 Features
 - Live crypto price tracking
